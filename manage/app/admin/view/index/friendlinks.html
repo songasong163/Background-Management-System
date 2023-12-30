@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>开始使用 layui</title>
+  <script src="/public/static//js/jquery-3.5.1.min.js"></script>
+  <link rel="stylesheet" href="/public/static/layui/css/layui.css">
+  <link rel="stylesheet" href="/public/static/css/main.css">
+  
+</head>
+<body>
+    <table class="layui-table">
+        <thead>
+          <tr>
+            <th><strong>ID</strong></th>
+            <th><strong>链接名称</strong></th>
+            <th><strong>URL</strong></th>
+            <th><strong>操作</strong></th>
+          </tr> 
+        </thead>
+        <tbody>
+          {foreach $data as $key=>$vo}
+          <tr>
+            <td>{$vo.id}</td>
+            <td>{$vo.linkName}</td>
+            <td>{$vo.linkUrl}</td>
+            <td>
+                <button type="button" value="{$vo.id}" class="del layui-btn layui-btn-danger">删除</button>
+            </td>
+          </tr>
+          {/foreach}
+        </tbody>
+      </table>
+      <div class="layui-card">
+        <div class="layui-card-header"><h3 style="color:#009688"><strong>添加友情链接</strong></h3></div>
+        <div class="layui-card-body">
+            <form class="layui-form" action="">
+                <div class="layui-form-item">
+                  <label class="layui-form-label">链接名称</label>
+                  <div class="layui-input-block">
+                    <input type="text" name="linkName" required  lay-verify="required" placeholder="请输入链接名称" autocomplete="off" class="layui-input">
+                  </div>
+                </div>
+                <div class="layui-form-item layui-form-text">
+                  <label class="layui-form-label">链接地址</label>
+                  <div class="layui-input-block">
+                    <textarea name="linkUrl" placeholder="URL=" class="layui-textarea"></textarea>
+                  </div>
+                </div>
+                <div class="layui-form-item">
+                  <div class="layui-input-block">
+                    <button class="layui-btn" lay-submit lay-filter="formDemo">添加友情链接</button>
+                    <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                  </div>
+                </div>
+              </form>
+        </div>
+      </div>
+      <script src="/public/static/layui/layui.js"></script> 
+</body>
+<script>
+   layui.use('form', function(){
+        var form = layui.form;
+        form.on('submit(formDemo)', function(data){
+          $.ajax({
+            type:'post',
+            dataType:'json',
+            data:data.field,
+            url:'http://localhost:88/public/index.php/admin/Operate/addfrienlink',
+            success:function(res){
+                res?layer.msg('<i class="layui-icon" style="color:#1E9FFF;font-size:20px">&#xe650; 添加成功</i>'):layer.msg('<i class="layui-icon" style="color:#FF5722;font-size:20px">&#xe69c; 修改失败</i>');
+                relo();
+              },
+              error:function(){
+                  layer.msg('<i class="layui-icon" style="color:#FF5722;font-size:20px">&#xe69c; 添加失败</i>');
+              }
+        })
+          return false;
+        });
+    });
+    $('.del').click(function(){
+      id=$(this).val();
+      layer.confirm('<strong>您确定要删除？</strong>', {
+        btn: ['确定','取消'] //按钮
+      }, function(){
+          $.ajax({
+            type:'put',
+            dataType:'json',
+            url:'http://localhost:88/public/index.php/admin/Operate/del',
+            data:{classify:'friendlinks',id:id},
+            success:function(res){
+              res?layer.msg('<i class="layui-icon" style="color:#1E9FFF;font-size:20px">&#xe650; 删除成功</i>')
+              :layer.msg('<i class="layui-icon" style="color:#FF5722;font-size:20px">&#xe69c; 删除失败</i>');
+          }
+        })
+      });
+      relo();
+    })
+</script>
+</html>

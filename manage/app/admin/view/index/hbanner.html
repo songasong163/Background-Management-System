@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>开始使用 layui</title>
+  <script src="/public/static//js/jquery-3.5.1.min.js"></script>
+  <link rel="stylesheet" href="/public/static/layui/css/layui.css">
+  <link rel="stylesheet" href="/public/static/css/main.css">
+  
+</head>
+<style>
+  img{
+    max-height: 100px;
+  }
+</style>
+<body>
+    <table class="layui-table">
+        <thead>
+          <tr>
+            <th><strong>ID</strong></th>
+            <th><strong>图片预览</strong></th>
+            <th><strong>名称</strong></th>
+            <th><strong>描述</strong></th>
+            <th><strong>排序</strong></th>
+            <th><strong>操作</strong></th>
+          </tr> 
+        </thead>
+        <tbody>
+          {foreach $data as $key=>$vo}
+          <tr>
+            <td>{$vo.id}</td>
+            <td><img class=".layui-table img" src="{$vo.img_url}"/></td>
+            <td>{$vo.title}</td>
+            <td>{$vo.descriptio}</td>
+            <td>{$vo.sort}</td>
+            <td>
+                <button type="button" value="{$vo.id}" class="modify layui-btn layui-btn-normal">修改</button>
+                <button type="button" value="{$vo.id}" class="del layui-btn layui-btn-danger">删除</button>
+            </td>
+          </tr>
+          {/foreach}
+        </tbody>
+      </table>
+      <div class="layui-card">
+        <div class="layui-card-header"><h3 style="color:#009688"><strong>添加轮播图</strong></h3></div>
+        <div class="layui-card-body">
+            <form class="layui-form" onsubmit="return false" action="">
+                <div class="layui-form-item">
+                  <label class="layui-form-label">标题</label>
+                  <div class="layui-input-block">
+                    <input type="text" id="title" name="title" required  lay-verify="required" placeholder="请输入标题" autocomplete="off" class="layui-input">
+                  </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">上传</label>
+                    <div class="layui-input-inline">
+                      <input type="text" id="bannerurl" name="bannerurl" required lay-verify="required" placeholder="URL=" autocomplete="off" class="layui-input">
+                    </div>
+                    <button type="button" class="layui-btn" id="bannerbtn">
+                        <i class="layui-icon">&#xe67c;</i>上传图片
+                      </button>
+                  </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">排序</label>
+                    <div class="layui-input-block">
+                      <input type="text" id="order" name="order" required  lay-verify="required" placeholder="请输入序号" autocomplete="off" class="layui-input">
+                    </div>
+                  </div>
+                <div class="layui-form-item layui-form-text">
+                  <label class="layui-form-label">描述</label>
+                  <div class="layui-input-block">
+                    <textarea name="desc" id="desc" placeholder="请输入描述内容或备注" class="layui-textarea"></textarea>
+                  </div>
+                </div>
+                <div class="layui-form-item">
+                  <div class="layui-input-block">
+                    <button class="layui-btn" id="addimg" lay-submit lay-filter="formDemo">添加图片</button>
+                    <button type="reset" id="reset" class="layui-btn layui-btn-primary">重置</button>
+                  </div>
+                </div>
+              </form>
+        </div>
+      </div>
+      <script src="/public/static/layui/layui.js"></script>
+      <script src="/public/static/js/main.js"></script>  
+</body>
+<script>
+    layui.use('upload', function(){
+    var upload = layui.upload;
+    //执行实例
+    var uploadInst = upload.render({
+            elem: '#bannerbtn' //绑定元素
+            ,url: 'http://localhost:88/public/index.php/admin/upimg/upimg' //上传接口
+            ,accept: 'images'
+            ,done: function(res){
+                $('#bannerurl').val(res);
+            //上传完毕回调
+            }
+            ,error: function(error){
+                console.log(error);
+            //请求异常回调
+            }
+        });
+    });
+    $('.del').click(function(){
+        id=$(this).val();
+        layer.confirm('<strong>您确定要删除？</strong>', {
+        btn: ['确定','取消'] //按钮
+      }, function(){
+          $.ajax({
+            type:'put',
+            dataType:'json',
+            url:'http://localhost:88/public/index.php/admin/Operate/del',
+            data:{classify:'banner',id:id},
+            success:function(res){
+              res?layer.msg('<i class="layui-icon" style="color:#1E9FFF;font-size:20px">&#xe650; 删除成功</i>')
+              :layer.msg('<i class="layui-icon" style="color:#FF5722;font-size:20px">&#xe69c; 删除失败</i>');
+          }
+        })
+        relo();
+      }); 
+    })
+</script>
+</html>

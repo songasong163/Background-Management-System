@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>开始使用 layui</title>
+  <link rel="stylesheet" href="/public/static/layui/css/layui.css">
+  <link rel="stylesheet" href="/public/static/css/main.css">
+  <link rel="stylesheet" href="/public/static/css/systeminfo.css">
+  <script src="/public//static/js/jquery-3.5.1.min.js"></script>
+</head>
+    <body>
+        
+        <div class="layui-panel" style="padding:20px">
+            <fieldset class="layui-elem-field">
+                <legend>云之讯短接接入台</legend>
+                <div class="layui-field-box">
+                    云之讯短信接入平台链接：<a href="https://www.ucpaas.com/index.html" style="color:#5FB878">链接直达</a>
+                </div>
+              </fieldset>
+            <form class="layui-form" action="">
+                <div class="layui-form-item">
+                  <label class="layui-form-label">token</label>
+                  <div class="layui-input-block">
+                    <input type="text" name="token" required="required" value="{$data['token']}"  lay-verify="required" placeholder="用户密钥'Auth Token'" autocomplete="off" class="layui-input">
+                  </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">sid</label>
+                    <div class="layui-input-block">
+                      <input type="text" name="sid" required="required" value="{$data['sid']}"  lay-verify="required" placeholder="账号唯一标识'Account Sid'" autocomplete="off" class="layui-input">
+                    </div>
+                  </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">appid</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="appid" required="required" value="{$data['appid']}" lay-verify="required" placeholder="创建应用时系统分配的唯一标示'appid'" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">templateId</label>
+                    <div class="layui-input-block">
+                      <input type="text" name="templateid" required="required" value="{$data['templateid']}" lay-verify="required" placeholder="后台短信产品模板ID" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item" >
+                    <div class="layui-input-block" style="padding:40px">
+                      <button class="layui-btn" lay-submit lay-filter="formDemo">接入</button>
+                      <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                    </div>
+                  </div>
+            </form>
+        </div>   
+        
+        <script src="/public/static/layui/layui.js"></script>
+        <script src='/public/static/js/main.js'></script>
+    </body>
+    <script>
+      $(function(){
+        $.ajax({
+          type:'get',
+          dataType:'json',
+          url:"{:url('Operate/getucpaas')}",
+          success:function(res){
+            res = JSON.parse(res);
+            $("input[name='token']").val(res['token']);
+            $("input[name='sid']").val(res['sid']);
+            $("input[name='appid']").val(res['appid']);
+            $("input[name='templateid']").val(res['templateid']);
+          }
+        })
+      })
+      layui.use('form', function(){
+        var form = layui.form;
+        form.on('submit(formDemo)', function(data){
+          $.ajax({
+            type:'post',
+            dataType:'json',
+            data:data.field,
+            url:'http://localhost:88/public/index.php/admin/Operate/ucpaas',
+            success:function(res){
+              res?layer.msg('<i class="layui-icon" style="color:#1E9FFF;font-size:20px">&#xe650; 接入成功</i>'):layer.msg('<i class="layui-icon" style="color:#FF5722;font-size:20px">&#xe69c; 接入失败</i>');
+            },
+            error:function(){
+              layer.msg('<i class="layui-icon" style="color:#FF5722;font-size:20px">&#xe69c; 接入失败</i>');
+            }
+          })
+          return false;
+          relo();
+       });
+       
+      });
+
+      //appid  41c1e0fbc46b4a7a8c8691976d95f456
+      //sid  c8148d8c18deb98936505c792ed8927e
+      //token  fdfe96be4512d87b49c7f67a417d9ca9
+      //
+    </script>
+    </html>

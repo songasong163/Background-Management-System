@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>开始使用 layui</title>
+  <link rel="stylesheet" href="/public/static/layui/css/layui.css">
+  <link rel="stylesheet" href="/public/static/css/main.css">
+  <script src='/public/static/js/jquery-3.5.1.min.js'></script>
+</head>
+    <body>
+        <table class="layui-table" lay-skin="nob">
+            <tbody style="text-align: left;">
+                <tr>
+                <td>共计：<span id="total">0</span>篇</td>
+                <td>未审核：<span>0</span>篇</td>
+                <td>置顶：<span id="occumbo">0</span>篇</td>
+                <td>
+                    <div class="layui-input-inline">
+                        <input type="text" id="search" name="search" required lay-verify="required" placeholder="搜索内容" autocomplete="off" class="layui-input">
+                    </div>
+                    <button class="layui-btn" id="searchbtn" lay-submit lay-filter="formDemo"><i class="layui-icon">&#xe615;</i> 搜索</button>
+                </td>
+                </tr>
+                
+            </tbody>
+        </table>
+
+        <table class="layui-table">
+            <colgroup>
+              <!-- <col width="150">
+              <col width="200">
+              <col> -->
+            </colgroup>
+            <thead>
+              <tr>
+                <th><strong>ID</strong></th>
+                <th><strong>内容标题</strong></th>
+                <th><strong>内容封面</strong></th>
+                <th><strong>是否置顶</strong></th>
+                <th><strong>当前权限</strong></th>
+                <th><strong>阅览人数</strong></th>
+                <th><strong>发布时间</strong></th>
+                <th><strong>操作</strong></th>
+              </tr> 
+            </thead>
+            
+            <tbody id="col_list">
+            </tbody>
+          </table>
+        
+        <script src="/public/static/layui/layui.js"></script>
+        <script src="/public/static/js/main.js"></script>
+  </body>
+  <script>
+    var columnName;
+    $(function(){
+      columnName=decodeURI(window.location.href.split('?')[1]);
+      $.ajax({
+        type:'post',
+        dataType:'json',
+        url:'http://localhost:88/public/index.php/admin/Operate/getColList',
+        data:{columnName:columnName},
+        success:function(res){
+          res = JSON.parse(res);
+          $('#occumbo').text(res['oc_count']);
+          res=res['data'];
+          $('#total').text(res.length);
+          treat(res);
+        }
+      })
+    }); 
+    
+    </script>
+</html>

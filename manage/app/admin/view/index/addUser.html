@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>开始使用 layui</title>
+  <link rel="stylesheet" href="/public/static/layui/css/layui.css">
+  <link rel="stylesheet" href="/public/static/css/main.css">
+  <script src='/public/static/js/jquery-3.5.1.min.js'></script>
+</head>
+<body>
+    <div class="layui-panel" style="padding:20px">
+        <form class="layui-form" action="">
+            <div class="layui-form-item">
+              <label class="layui-form-label">管理员昵称</label>
+              <div class="layui-input-block">
+                <input type="text" name="userName" required="required"  lay-verify="required|username" placeholder="请输入用户昵称" autocomplete="off" class="layui-input">
+              </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">用户密码</label>
+                <div class="layui-input-block">
+                  <input type="text" name="passWord" required="required"  lay-verify="required|password" placeholder="请输入密码" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">手机号码</label>
+                <div class="layui-input-block">
+                  <input type="text" name="phone" required="required"  lay-verify="required|phone" placeholder="请输入手机号" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">用户分类</label>
+                <div class="layui-input-block">
+                  <input type="radio" name="member" value="1" title="普通会员">
+                  <input type="radio" name="member" value="2" title="SVIP专享" checked>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">积分</label>
+                <div class="layui-input-block">
+                  <input type="text" name="integralis" required="required"  lay-verify="required" placeholder="积分" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+              <div class="layui-input-block">
+                <button class="layui-btn" lay-submit lay-filter="formDemo">立即添加</button>
+                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+              </div>
+            </div>
+        </form>    
+    </div> 
+    
+<script src="/public/static/layui/layui.js"></script>
+<script>
+    layui.use('form', function(){
+      var form = layui.form;
+      form.verify({
+        username: function(value, item){ //value：表单的值、item：表单的DOM对象
+            if(!new RegExp("^[a-zA-Z0-9_\u4e00-\u9fa5\\s·]+$").test(value)){
+                return '用户名不能有特殊字符';
+            }
+            if(/(^\_)|(\__)|(\_+$)/.test(value)){
+                return '用户名首尾不能出现下划线\'_\'';
+            }
+            if(/^\d+\d+\d$/.test(value)){
+                return '用户名不能全为数字';
+            }
+        },
+        password: [/^[a-zA-Z]\w{5,17}$/,'以字母开头，长度在6~18之间，只能包含字母、数字和下划线'],
+        phone:[/^(13[0-9]|14[5|7]|15[0|1|2|3|5|6|7|8|9]|18[0|1|2|3|5|6|7|8|9])\d{8}$]$/,'格式有误！请核对电话号码']
+      });
+      form.on('submit(formDemo)', function(data){
+        $.ajax({
+          headers:{type:'user'},
+          type:'post',
+          dataType:'json',
+          data:data.field,
+          url:'http://localhost:88/public/index.php/admin/Operate/addAdmin',
+          success:function(res){
+              res?layer.msg('<i class="layui-icon" style="color:#1E9FFF;font-size:20px">&#xe650; 添加成功</i>'):layer.msg('<i class="layui-icon" style="color:#FF5722;font-size:20px">&#xe69c; 添加失败</i>');
+          },
+          error:function(){
+              layer.msg('<i class="layui-icon" style="color:#FF5722;font-size:20px">&#xe69c; 添加失败</i>');
+          }
+      })
+      var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
+      setTimeout(function(){parent.layer.close(index);parent.location.reload();},2000)
+        return false;
+      });
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>开始使用 layui</title>
+  <link rel="stylesheet" href="/public/static/layui/css/layui.css">
+  <link rel="stylesheet" href="/public/static/css/main.css">
+  <link rel="stylesheet" href="/public/static/css/systeminfo.css">
+  <script src="/public//static/js/jquery-3.5.1.min.js"></script>
+ 
+</head>
+<style>
+  .layui-layedit-iframe > img{
+    max-width: 40%;
+  }
+</style>
+    <body>
+        
+        <div class="layui-panel" style="padding:20px">
+            <form class="layui-form" onsubmit="return false" action="">
+                <div class="layui-form-item">
+                  <label class="layui-form-label">内容标题</label>
+                  <div class="layui-input-block">
+                    <input type="text" id="contentTitle"; name="contentTitle" required="required"  lay-verify="required" placeholder="请输入内容标题" autocomplete="off" class="layui-input">
+                  </div>
+                </div>
+                <div class="layui-form-item">
+                  <label class="layui-form-label">内容封面</label>
+                  <div class="layui-input-inline">
+                    <input type="text" id="head_imgurl" name="head_imgurl" required lay-verify="required" placeholder="URL=" autocomplete="off" class="layui-input">
+                  </div>
+                  <button type="button" class="layui-btn" id="upimg"><i class="layui-icon">&#xe67c;</i>上传封面图片</button>
+                </div>
+                <div class="layui-form-item">
+                  <label class="layui-form-label">所属栏目</label>
+                  <div class="layui-input-block">
+                    <select id="attrContent" name="attrContent" lay-verify="required">
+                      <option value=""></option>
+                      {foreach $data as $key=>$vo}
+                      <option value="{$vo.columnName}">{$vo.columnName}</option>
+                      {/foreach}
+                    </select>
+                  </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">权限</label>
+                    <div class="layui-input-block">
+                      <input type="radio" id="all" name="privile" value="0" title="所有人可看" checked>
+                      <input type="radio" id="member" name="privile" value="1" title="会员可看">
+                      <input type="radio" id="SVIP" name="privile" value="2" title="SVIP专享">
+                    </div>
+                  </div>
+                <div class="layui-form-item">
+                  <label class="layui-form-label">是否置顶</label>
+                  <div class="layui-input-block">
+                    <input type="checkbox" value="1" id="occumbo" name="occumbo" lay-skin="switch">
+                  </div>
+                </div>
+                <div class="layui-form-item">
+                  <input type="hidden" id="create_time" name="create_time" >
+                </div>
+                <textarea class="layui-textarea" name="content" id="LAY_demo1" lay-verify="content" style="display: none;"></textarea>
+                <div class="layui-form-item" >
+                    <div class="layui-input-block" style="padding:40px">
+                      <button class="layui-btn" lay-submit lay-filter="formDemo">重新发布</button>
+                      <button type="reset" class="layui-btn layui-btn-primary">清空</button>
+                    </div>
+                  </div>
+            </form>
+        </div>   
+        <script src="/public/static/layui/layui.js"></script>
+  </body>
+  <script>
+    var layedit,index;   
+    $(function(){
+      classify=decodeURI(window.location.href.split('=')[1].split('&')[0]);
+      id=window.location.href.split('=')[2];
+      $.ajax({
+          type:'post',
+          dataType:'json',
+          url:'http://localhost:88/public/index.php/admin/Operate/getUserinfo',
+          data:{classify:classify,id:id},
+          success:function(data){
+              data = JSON.parse(data)[0];
+              console.log(data);
+              $('#attrContent').val(data['attrContent']);
+              $('#contentTitle').val(data['contentTitle']);
+              $('#head_imgurl').val(data['head_imgurl']);
+              $('#LAY_demo1').val(data['content']);
+              layui.use('form', function(){
+                  var form = layui.form; //只有执行了这一步，部分表单元素才会自动修饰成功
+                  data['privile']==1?$('#user').attr('checked',''):data['privile']==2?$('#svip').attr('checked',''):'';
+                  data['occumbo']?$('#occumbo').attr('checked',''):'';
+                  form.render();
+              });
+              layui.use('layedit', function(){
+                layedit = layui.layedit,$ = layui.jquery;
+                layedit.set({	//设置图片接口
+                  uploadImage: {
+                    url: 'http://localhost:88/public/index.php/admin/upimg/editimg', //接口url
+                    type: 'post'
+                  },
+                  success:function(res){
+                    console.log(res);
+                  }
+                });
+                index = layedit.build('LAY_demo1');
+                layedit.setContent(index,data['content']);
+                
+              }); 
+          }
+      })
+    })
+        
+    //封面上传模块
+    layui.use('upload', function(){
+          var upload = layui.upload;
+          //执行实例
+          var uploadInst = upload.render({
+              elem: '#upimg' //绑定元素
+              ,url: 'http://localhost:88/public/index.php/admin/upimg/upimg' //上传接口
+              ,accept: 'images'
+              ,done: function(res){
+                  $('#head_imgurl').val(res);
+              //上传完毕回调
+              }
+              ,error: function(error){
+                  console.log(error);
+              //请求异常回调
+              }
+          });
+    });
+    $(function(){
+        $('#create_time').val(new Date().Format("yyyy-MM-dd HH:mm:ss"));
+      })
+    
+    layui.use('form', function(){
+      var form = layui.form;
+      //监听提交
+      form.on('submit(formDemo)', function(data){
+          delete data.field.file;
+          data.field.content = layedit.getContent(index);
+          data.field.id=window.location.href.split('=')[2];
+          $.ajax({
+            type:'post',
+            //$('#attrContent').val()
+            data:data.field,
+            dataType:'json',
+            url:'http://localhost:88/public/index.php/admin/Operate/editContent',
+            success:function(res){
+              res?layer.msg('<i class="layui-icon" style="color:#1E9FFF;font-size:20px">&#xe650; 修改成功</i>')
+              :layer.msg("<i class='layui-icon' style='color:#FF5722;font-size:20px>&#xe69c; 修改失败</i>");
+            },
+            error:function(e){
+                layer.msg('<i class="layui-icon" style="color:#FF5722;font-size:20px">&#xe69c; 修改失败</i>');
+                console.log(e);
+            }
+          });
+        return false;
+      });
+    });
+  </script>
+</html>
